@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"unicode/utf8"
 )
 
 var _ = bytes.ContainsAny
@@ -13,12 +12,12 @@ var _ = bytes.ContainsAny
 func main() {
 	if len(os.Args) < 3 || os.Args[1] != "-E" {
 		fmt.Fprintf(os.Stderr, "usage: mygrep -E <pattern>\n")
-		os.Exit(2) 
+		os.Exit(2)
 	}
 
 	pattern := os.Args[2]
 
-	line, err := io.ReadAll(os.Stdin) 
+	line, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: read input text: %v\n", err)
 		os.Exit(2)
@@ -36,23 +35,17 @@ func main() {
 }
 
 func matchLine(line []byte, pattern string) (bool, error) {
-	
+	fmt.Fprintln(os.Stderr, "Logs from your program will appear here!")
+
 	if pattern == "\\d" {
 		return bytes.ContainsAny(line, "0123456789"), nil
+	} else if pattern == "\\w" {
+		return bytes.ContainsAny(line, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"), nil
 	}
-	else pattern == "\\w" {
-		return bytes.ContainsAny(line, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")
-	}
-	
-	if utf8.RuneCountInString(pattern) != 1 {
+
+	if len(pattern) != 1 {
 		return false, fmt.Errorf("unsupported pattern: %q", pattern)
 	}
 
-	var ok bool
-
-	fmt.Fprintln(os.Stderr, "Logs from your program will appear here!")
-
-	ok = bytes.ContainsAny(line, pattern)
-
-	return ok, nil
+	return bytes.ContainsAny(line, pattern), nil
 }
